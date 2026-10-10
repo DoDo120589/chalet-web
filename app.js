@@ -6,7 +6,7 @@
  * im Browser, Daten liegen in einer Supabase-Datenbank (kostenlos gehostet).
  * Login funktioniert über einen einzigen gemeinsamen Supabase-Auth-Account
  * (siehe config.js) - die Familie sieht nach außen nur ein Passwortfeld,
- * im Hintergrund wird supabase.auth.signInWithPassword() mit der festen
+ * im Hintergrund wird supabaseClient.auth.signInWithPassword() mit der festen
  * FAMILY_EMAIL aufgerufen.
  *
  * Sicherheit: Row Level Security (siehe supabase-schema.sql) sorgt dafür,
@@ -15,7 +15,7 @@
  * ist (das ist bei Supabase so gewollt, siehe config.js).
  */
 
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let bookings = [];
 let cur = new Date();
@@ -65,7 +65,7 @@ async function checkPw() {
   const btn = document.getElementById("login-btn");
   btn.disabled = true;
 
-  const { error } = await supabase.auth.signInWithPassword({
+  const { error } = await supabaseClient.auth.signInWithPassword({
     email: FAMILY_EMAIL,
     password: val,
   });
@@ -83,7 +83,7 @@ async function checkPw() {
 }
 
 async function logout() {
-  await supabase.auth.signOut();
+  await supabaseClient.auth.signOut();
   showLogin();
 }
 
@@ -103,7 +103,7 @@ function showApp() {
 // (supabase-js speichert die Sitzung automatisch im Browser, daher bleibt
 // man eingeloggt, auch nach Schließen des Browsers).
 async function initAuth() {
-  const { data } = await supabase.auth.getSession();
+  const { data } = await supabaseClient.auth.getSession();
   if (data.session) {
     showApp();
   } else {
@@ -183,7 +183,7 @@ async function runCheck() {
 
   // Überschneidung suchen: eine bestehende Buchung überlappt mit [von, bis],
   // wenn ihr Start <= unser Ende UND ihr Ende >= unser Start ist.
-  const { data, error } = await supabase
+  const { data, error } = await supabaseClient
     .from("bookings")
     .select("*")
     .lte("von", bis)
@@ -232,7 +232,7 @@ document.getElementById("q-book-btn").addEventListener("click", async () => {
   btn.disabled = true;
   btn.textContent = "Wird gespeichert...";
 
-  const { error } = await supabase.from("bookings").insert({ von, bis, name, notiz });
+  const { error } = await supabaseClient.from("bookings").insert({ von, bis, name, notiz });
 
   btn.disabled = false;
   btn.textContent = "Jetzt buchen";
@@ -253,7 +253,7 @@ async function loadBookingsAndRenderCalendar() {
   const cal = document.getElementById("calendar");
   cal.innerHTML = '<div class="loading">Buchungen werden geladen...</div>';
 
-  const { data, error } = await supabase.from("bookings").select("*").order("von");
+  const { data, error } = await supabaseClient.from("bookings").select("*").order("von");
   bookings = error ? [] : data;
   renderCalendar();
 }
@@ -384,7 +384,7 @@ async function saveNew() {
   btn.textContent = "Wird gespeichert...";
   btn.disabled = true;
 
-  const { error } = await supabase.from("bookings").insert({ von, bis, name, notiz });
+  const { error } = await supabaseClient.from("bookings").insert({ von, bis, name, notiz });
 
   if (error) {
     showError(err, friendlyError(error));
@@ -419,7 +419,7 @@ function showBooking(b) {
 
 async function deleteBooking(id) {
   if (!confirm("Buchung wirklich löschen?")) return;
-  const { error } = await supabase.from("bookings").delete().eq("id", id);
+  const { error } = await supabaseClient.from("bookings").delete().eq("id", id);
   if (error) {
     alert("Fehler beim Löschen: " + friendlyError(error));
     return;
@@ -466,7 +466,7 @@ async function saveEdit(id) {
   // Supabase/Postgres prüft die Einschränkung aber erst NACH dem Update auf
   // die neuen Werte der Zeile mit dieser id - eine Kollision mit sich selbst
   // tritt dabei nicht auf, da es dieselbe Zeile ist (kein zweiter Eintrag).
-  const { error } = await supabase
+  const { error } = await supabaseClient
     .from("bookings")
     .update({ von, bis, name, notiz })
     .eq("id", id);
