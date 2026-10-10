@@ -15,8 +15,8 @@
  * Project Settings -> API):
  */
 
-const SUPABASE_URL = https://rpfmpjkzhgmrkkyrnluo.supabase.co;          // z.B. https://abcdefgh.supabase.co
-const SUPABASE_ANON_KEY = sb_publishable_ILadB6hygvwp8cZHt-Tqeg_9RaDDKus;        // langer String, beginnt meist mit "eyJ..."
+const SUPABASE_URL = "https://rpfmpjkzhgmrkkyrnluo.supabase.co";          // z.B. https://abcdefgh.supabase.co
+const SUPABASE_ANON_KEY = "sb_publishable_ILadB6hygvwp8cZHt-Tqeg_9RaDDKus";        // langer String, beginnt meist mit "eyJ..."
 
 // Die E-Mail-Adresse des EINEN gemeinsamen Familien-Accounts, den du unter
 // "Authentication" -> "Users" -> "Add user" im Supabase-Dashboard anlegst.
